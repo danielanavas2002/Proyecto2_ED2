@@ -11,6 +11,8 @@
 #define pinBtnG PF_0 //Boton Guardar 
 // TFT
 #define CS_PIN PA_3
+// Buzzer Pasivo
+#define pinBuzzer PF_2
 //****************************************************************
 // Variables Globales
 //****************************************************************
@@ -51,6 +53,8 @@ void setup() {
   // Definicion de Entradas
   pinMode(pinBtnR, INPUT_PULLUP);
   pinMode(pinBtnG, INPUT_PULLUP);
+  // Definicion de Salidas
+  pinMode(pinBuzzer, OUTPUT);
   // Monitor Serial 
   Serial.begin(115200); // Con Computadora
   Serial1.begin(115200); // Con ESP32
@@ -90,6 +94,9 @@ void loop() {
       btnR_S = btnR_R;
       if (btnR_S == LOW) {
         Serial1.println('1'); //Enviar un "1" al ESP32 por medio del Serial 1, para que sepa que debe enviar un dato de distancia
+        tone(pinBuzzer, 2093, 200); // Indicador auditivo por medio de Buzzer Pasivo por 200 ms
+        delay(200);
+        noTone(pinBuzzer);
       }
     }
   }
@@ -102,6 +109,9 @@ void loop() {
       btnG_S = btnG_R;
       if (btnG_S == LOW) {
         datalogger(); // Llamar función data logger para registrar los datos en un archivo de texto en la SD
+        tone(pinBuzzer, 3136, 200); // Indicador auditivo por medio de Buzzer Pasivo por 200 ms
+        delay(200);
+        noTone(pinBuzzer);
       }
     }
   }
