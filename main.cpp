@@ -2,6 +2,7 @@
 // Librerías
 //****************************************************************
 #include <Arduino.h>
+#include <lecturaSensor.h>
 //****************************************************************
 // Definición de etiquetas
 //****************************************************************
@@ -9,14 +10,9 @@
 #define trigger 32
 #define echo 35
 //****************************************************************
-// Prototipos de Funciones
-//****************************************************************
-void lecturaSensor(void);
-//****************************************************************
 // Variables Globales
 //****************************************************************
-// Funcionamiento Sensor Ultrasonico
-float tiempoE;
+// Distancia en Sensor Ultrasonico
 float distancia;
 // Comado cuando se deba enviar un Dato a la Tiva
 int comando;
@@ -40,23 +36,11 @@ void loop() {
     comando = Serial1.read(); // Leer este valor y almacenar en variable comando
   }
   if(comando == '1'){ // Si comando es igual a 1
-    lecturaSensor(); // Realizar una lectura del Sensor 
-    Serial1.println(distancia); // Enviar este dato en el Serial 1
+    distancia = lectura(trigger, echo); // Se mide la distancia utilizando la Libreria del Sensor
+    Serial1.println(distancia); // Enviar este dato en el Serial 1 por UART hacia la Tiva
+    Serial.print("Dato enviado: "); //Enviar dato en el Serial 0 por UART hacia la computadora
+    Serial.print(distancia);
+    Serial.println(" cm");
     comando = 0; // Reiniciar comado
   }
-}
-//****************************************************************
-// Lectura Sensor
-//****************************************************************
-void lecturaSensor(void){
-  digitalWrite(trigger, LOW); // Apagar el trigger 2 microsegundos
-  delayMicroseconds(2);
-  digitalWrite(trigger, HIGH); // Encender el trigger 10 microsegundos
-  delayMicroseconds(10);
-  digitalWrite(trigger, LOW); // Apagar nuevamente el trigger
-  tiempoE = pulseIn(echo, HIGH); // Tiempo en microsegundos que el echo esta en HIGH
-  distancia = (tiempoE/2)/29.15; // Convertir este tiempo a una medida equivalente en Segundos
-  Serial.print("Dato Enviado: "); // Enviar dato en Serial 0 para que sea visible en la Computadora
-  Serial.print(distancia); 
-  Serial.println(" cm");
 }
