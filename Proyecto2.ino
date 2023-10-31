@@ -84,6 +84,7 @@ int distDecimal;
 int distEntero;
 // Barra de LLenado
 int porLlenado;
+float altMAX = 11.50;
 //********************************************************************************
 // Escritura SD
 //********************************************************************************
@@ -103,11 +104,9 @@ void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c);
 void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
-
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
-
-
+void gotaM(void);
 extern uint8_t fondo[];
 //*****************************************************************************
 // Configuración
@@ -137,7 +136,7 @@ void setup() {
     myFile.println("**********************************"); 
     myFile.println("          NUEVO REGISTRO          ");
     myFile.println("**********************************");
-    myFile.println("DIA | HORA | MIN | SEG | DISTANCIA");
+    myFile.println("DIA | HORA | MIN | SEG | ALT. AGUA");
     myFile.close();
   } else {
     Serial.println("Error al abrir el archivo de datos."); // Indicar si no se puede abrir el archivo
@@ -157,7 +156,7 @@ void setup() {
   LCD_Print(text4, 20, 160, 2, 0x00, 0xA71F);
   FillRect(15, 180, 135, 55, 0x022B);
   FillRect(165, 215, 140, 20, 0x00);
-  LCD_Bitmap(185, 55, 100, 145, gota);    
+  LCD_Bitmap(185, 55, 100, 145, gota); 
 }
 //*****************************************************************************
 // Loop Principal
@@ -191,14 +190,6 @@ void loop() {
       btnG_S = btnG_R;
       if (btnG_S == LOW) {
         datalogger(); // Llamar función data logger para registrar los datos en un archivo de texto en la SD
-        FillRect(15, 180, 135, 55, 0x022B); //Mostrar en TFT
-        LCD_Print(horaString, 20, 190, 2, 0xffff, 0x022B);
-        LCD_Print(dospuntostxt, 50, 190, 2, 0xffff, 0x022B);
-        LCD_Print(minString, 65, 190, 2, 0xffff, 0x022B);
-        LCD_Print(dospuntostxt, 95, 190, 2, 0xffff, 0x022B);
-        LCD_Print(segString, 110, 190, 2, 0xffff, 0x022B);
-        LCD_Print(diastxt, 30, 210, 2, 0xffff, 0x022B);
-        LCD_Print(diaString, 110, 210, 2, 0xffff, 0x022B);
         tone(pinBuzzer, 3136, 200); // Indicador auditivo por medio de Buzzer Pasivo por 200 ms
         delay(200);
         noTone(pinBuzzer);
@@ -221,7 +212,10 @@ void loop() {
        FillRect(15, 85, 135, 45, 0x03F9); //Mostrar en TFT
        LCD_Print(distString, 20, 100, 2, 0xffff, 0x03F9);
        LCD_Print(cmtxt, 110, 100, 2, 0xffff, 0x03F9);
-       porLlenado = map(dist, 0.00, 11.50, 10, 130);
+       porLlenado = map(dist, 0.00, altMAX, 5, 130);
+       if (porLlenado > 130){
+        porLlenado = 130;
+       }
        FillRect(165, 215, 140, 20, 0x00);
        FillRect(170, 220, porLlenado, 10, 0x13F2);
     }
@@ -279,17 +273,49 @@ void datalogger(void){
   myFile = SD.open("datalog.txt", FILE_WRITE); // Abrir Archivo de datos como Escritura
   if (myFile) {
     // Escribe tiempo y distancia en el archivo de datos
-    myFile.print(dia);
-    myFile.print("   | ");
-    myFile.print(hora);
-    myFile.print("    | ");
-    myFile.print(minuto);
-    myFile.print("   | ");
-    myFile.print(segundo);
-    myFile.print("  | ");
+    if(dia < 10){
+      myFile.print("0");
+      myFile.print(dia);
+      myFile.print("  | ");
+     } else{
+        myFile.print(dia);
+        myFile.print("  | ");
+       }
+     if(hora < 10){
+      myFile.print("0");
+      myFile.print(hora);
+      myFile.print("   | ");
+     } else{
+        myFile.print(hora);
+        myFile.print("   | ");
+       }
+     if(minuto < 10){
+      myFile.print("0");
+      myFile.print(minuto);
+      myFile.print("  | ");
+     } else{
+        myFile.print(minuto);
+        myFile.print("  | ");
+       }
+     if(segundo < 10){
+      myFile.print("0");
+      myFile.print(segundo);
+      myFile.print("  | ");
+     } else{
+        myFile.print(segundo);
+        myFile.print("  | ");
+       }
     myFile.print(dist);
     myFile.println(" cm");
     myFile.close();
+    FillRect(15, 180, 135, 55, 0x022B); //Mostrar en TFT
+    LCD_Print(horaString, 20, 190, 2, 0xffff, 0x022B);
+    LCD_Print(dospuntostxt, 50, 190, 2, 0xffff, 0x022B);
+    LCD_Print(minString, 65, 190, 2, 0xffff, 0x022B);
+    LCD_Print(dospuntostxt, 95, 190, 2, 0xffff, 0x022B);
+    LCD_Print(segString, 110, 190, 2, 0xffff, 0x022B);
+    LCD_Print(diastxt, 30, 210, 2, 0xffff, 0x022B);
+    LCD_Print(diaString, 110, 210, 2, 0xffff, 0x022B);
     Serial.println("Dato registrados en la tarjeta SD."); // Indicar que se guardaron los datos
   } else {
     Serial.println("Error al abrir el archivo de datos."); // Indicar si hay un error con el archivo
