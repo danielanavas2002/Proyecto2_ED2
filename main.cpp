@@ -40,7 +40,7 @@ void loop() {
   if(comando == '1'){ // Si comando es igual a 1
     distanciaI = lectura(trigger, echo); // Se mide la distancia utilizando la Libreria del Sensor
     distancia = alturaRec - distanciaI; //Se calcula la altura del nivel del agua sabiendo el alto del recipiente
-    if (distancia < 0){ //Si en algun momento se da una medicion erronea y se tiene un numero negativo
+    if (distancia <= 0){ //Si en algun momento se da una medicion erronea y se tiene un numero negativo
       distancia = 0.01; //Enviar un dato mayor a 0 para evitar problemas en la Tiva
     }
     Serial1.println(distancia); // Enviar este dato en el Serial 1 por UART hacia la Tiva
